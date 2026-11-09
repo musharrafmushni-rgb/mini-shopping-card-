@@ -1,0 +1,33 @@
+/* Toast Notification Animation (Slide from right) */
+@keyframes toastSlideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.toast-show {
+    animation: toastSlideIn 0.3s ease-out forwards;
+}
+
+/* Cart Slide-in */
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.cart-open { animation: slideInRight 0.3s ease-out forwards; }
+
+/* Modal Fade-in Scale */
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+.modal-pop { animation: modalPop 0.3s ease-out forwards; }
+
+/* Item Fade-in */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.item-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+/* Hide scrollbar for category buttons */
+.overflow-x-auto::-webkit-scrollbar { display: none; }
+.overflow-x-auto { -ms-overflow-style: none; scrollbar-width: none; }

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniShop - Advanced Ecommerce</title>
+    <link href="./src/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS File -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<!-- Light/Dark Mode classes -->
+<body class="font-sans text-gray-800 dark:text-gray-100 overflow-x-hidden relative min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+
+    <!-- 1. Background Image (Fixed z-index) -->
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop" alt="Background" class="w-full h-full object-cover opacity-20 dark:opacity-10">
+    </div>
+
+    <!-- 2. Toast Notification Container (Changed position & z-index) -->
+    <div id="toastContainer" class="fixed top-24 right-4 z-[999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- 3. Navbar -->
+    <nav class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2 text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                <i class="fa-solid fa-bag-shopping"></i> MiniShop
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Dark/Light Mode Toggle -->
+                <button id="themeToggle" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition text-xl">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <!-- Wishlist Button -->
+                <button onclick="toggleWishlist()" class="relative text-gray-600 dark:text-gray-300 hover:text-red-500 transition active:scale-95">
+                    <i class="fa-regular fa-heart text-xl"></i>
+                    <span id="wishlistCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </button>
+                <!-- Cart Button -->
+                <button onclick="toggleCart()" class="relative bg-indigo-50 dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 px-4 py-2 rounded-full font-semibold hover:bg-indigo-100 dark:hover:bg-gray-600 transition-all duration-300 flex items-center gap-2 hover:shadow-md active:scale-95">
+                    <i class="fa-solid fa-cart-shopping"></i> Cart
+                    <span id="cartCount" class="bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 4. Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8 relative z-10">
+        <section class="flex-1">
+            <!-- Search & Filter -->
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center transition-colors duration-300">
+                <div class="relative w-full md:w-1/2">
+                    <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 dark:text-white transition-colors">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+                    <button onclick="setCategory('all', this)" class="category-btn bg-indigo-600 text-white px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">All</button>
+                    <button onclick="setCategory('electronics', this)" class="category-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">Electronics</button>
+                    <button onclick="setCategory('fashion', this)" class="category-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">Fashion</button>
+                    <button onclick="setCategory('accessories', this)" class="category-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">Accessories</button>
+                </div>
+            </div>
+
+            <!-- Products -->
+            <h2 class="text-2xl font-bold mb-6">Our Products</h2>
+            <div id="productList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </section>
+
+        <!-- 5. Cart Sidebar -->
+        <section id="cartSidebar" class="hidden lg:block w-full lg:w-96 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 h-fit sticky top-24 transition-colors duration-300">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+                <h2 class="text-xl font-bold">Your Cart</h2>
+                <button onclick="toggleCart()" class="lg:hidden text-gray-500 dark:text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div id="cartItems" class="space-y-4 mb-6 max-h-[60vh] overflow-y-auto pr-2"></div>
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div class="flex justify-between items-center text-lg font-bold mb-4">
+                    <span>Total:</span>
+                    <span id="cartTotal" class="text-indigo-600 dark:text-indigo-400 transition-transform duration-200">$0.00</span>
+                </div>
+                <button onclick="openOrderSummary()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95">Checkout</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals (Product, Wishlist, Order) - Keep same structure as before -->
+    <!-- 6. Product Details Modal -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div id="modalContent" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col md:flex-row relative modal-pop">
+            <button onclick="closeModal()" class="absolute top-3 right-3 bg-white/80 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-full w-8 h-8 flex items-center justify-center transition z-10"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-full md:w-1/2 h-64 md:h-auto bg-gray-100 dark:bg-gray-700">
+                <img id="modalImg" src="" alt="Product" class="w-full h-full object-cover">
+            </div>
+            <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center">
+                <h3 id="modalTitle" class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Product Name</h3>
+                <p id="modalPrice" class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-4">$0.00</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6">High-quality product designed for daily use.</p>
+                <button id="modalAddBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition active:scale-95 flex items-center justify-center gap-2"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Wishlist Modal -->
+    <div id="wishlistModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 relative modal-pop">
+            <button onclick="toggleWishlist()" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> Your Wishlist</h2>
+            <div id="wishlistItems" class="space-y-4 max-h-[60vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- 8. Order Summary Modal -->
+    <div id="orderModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-8 relative modal-pop text-center">
+            <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-check text-2xl text-green-600 dark:text-green-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 dark:text-white">Order Summary</h2>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">Please review your order before confirming.</p>
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6 text-left">
+                <div class="flex justify-between mb-2 dark:text-gray-300"><span>Subtotal:</span> <span id="summarySubtotal">$0.00</span></div>
+                <div class="flex justify-between mb-2 dark:text-gray-300"><span>Shipping:</span> <span class="text-green-600 dark:text-green-400">Free</span></div>
+                <div class="flex justify-between font-bold text-lg border-t border-gray-200 dark:border-gray-600 pt-2 mt-2 dark:text-white"><span>Total:</span> <span id="summaryTotal" class="text-indigo-600 dark:text-indigo-400">$0.00</span></div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="closeOrderSummary()" class="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white py-3 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-500 transition">Cancel</button>
+                <button onclick="confirmOrder()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition shadow-md">Confirm Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External JavaScript File -->
+    <script src="script.js"></script>
+</body>
+</html>
